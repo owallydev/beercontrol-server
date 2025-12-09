@@ -1,75 +1,34 @@
 // ===============================
 // Definição das rotas da API
 // ===============================
-import express from "express";
-import sqlite3 from "sqlite3";
+import { Router } from "express";
 
-const router = express.Router();
+import * as Station from "./controllers/stationController.js";
+import * as Auth from "./controllers/authController.js";
+import * as Device from "./controllers/deviceController.js";
 
-// Abre o banco SQLite dentro do Render (persistência limitada — OK p/ testes)
-const db = new sqlite3.Database("/opt/render/project/src/data/beercontrol.db");
+const routes = Router();
 
-// Cria tabela se não existir
-db.run(`
-  CREATE TABLE IF NOT EXISTS devices (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    mac TEXT UNIQUE,
-    model TEXT,
-    serial TEXT,
-    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
-
-// =========================
-//   ATIVAÇÃO DO DISPOSITIVO
-// =========================
-router.post("/device/activate", (req, res) => {
-  const { mac, model } = req.body;
-
-  if (!mac || !model) {
-    return res.status(400).json({
-      activateOK: false,
-      activateMsg: "MAC_OR_MODEL_MISSING"
-    });
-  }
-
-  // Gera serial no formato BCYYMMDDXXXX
-  const prefix = "BC";
-  const date = new Date();
-  const code =
-    date.getFullYear().toString().slice(2) +
-    String(date.getMonth() + 1).padStart(2, "0") +
-    String(date.getDate()).padStart(2, "0");
-
-  // Serial final
-  const serial = `${prefix}${code}${Math.floor(Math.random() * 9999)
-    .toString()
-    .padStart(4, "0")}`;
-
-  // Insere ou atualiza dispositivo
-  db.run(
-    `
-    INSERT INTO devices (mac, model, serial)
-    VALUES (?, ?, ?)
-    ON CONFLICT(mac) DO UPDATE SET serial = excluded.serial, model = excluded.model
-  `,
-    [mac, model, serial],
-    (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({
-          activateOK: false,
-          activateMsg: "DB_ERROR"
-        });
-      }
-
-      return res.json({
-        activateOK: true,
-        serial,
-        activateMsg: "DEVICE_ACTIVATED"
-      });
-    }
-  );
+// ------------------ Rota básica ------------------
+routes.get("/", (req, res) => {
+  res.json({ status: "BeerControl API online" });
 });
 
-export default router;
+// ------------------ Auth -------------------------
+routes.post("/login", Auth.login);
+
+// ------------------ Station / Tokens -------------
+routes.post("/station/token", Station.generateToken);
+
+// ------------------ Ping p/ ESP32 ----------------
+// Usado pelo firmware no comando SERVER_TEST (GET em /api/ping)
+routes.get("/api/ping", Device.ping);
+
+// ------------------ Dispositivos / Serial --------
+// Ativação de dispositivo (gera ou reutiliza serial)
+routes.post("/device/activate", Device.activateDevice);
+
+// Consulta por MAC (debug / suporte)
+routes.get("/device/by-mac/:mac", Device.getDeviceByMac);
+
+export default routes;
