@@ -1,12 +1,24 @@
-# BeerControl Server
+# 🍺 BeerControl Server  
+Backend oficial do BeerControl, escrito em **Node.js + Express**, projetado para funcionar com o **ESP32 FlowNode** e o aplicativo BeerControlConfig.
 
-Backend inicial do projeto **BeerControl**, escrito em **Node.js + Express**.
+---
 
-## 🚀 Funcionalidades iniciais
+## 🚀 Funcionalidades Principais
 
-- Rota de saúde (`GET /`) para testar se a API está online
-- Rota de login (`POST /login`) que devolve um token JWT (mock simples)
-- Rota para gerar token de estação (`POST /station/token`)
+### ✔ Health Check  
+`GET /api/ping`  
+Retorna se a API está online (usado pelo ESP32 no comando SERVER_TEST).
+
+### ✔ Ativação de Dispositivo (ESP32)  
+`POST /api/device/activate`  
+Registra ou atualiza um FlowNode no servidor.
+
+Exemplo do corpo enviado pelo ESP32:
+```json
+{
+  "mac": "AA:BB:CC:DD:EE:FF",
+  "model": "BC-FLOWNODE"
+}
 
 ## 📦 Como rodar localmente
 
