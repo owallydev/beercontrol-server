@@ -1,5 +1,5 @@
 // ===============================
-// Conexão e inicialização do SQLite
+// Conexão e inicialização do SQLite (Compatível com Render)
 // ===============================
 import sqlite3 from "sqlite3";
 import path from "path";
@@ -9,8 +9,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Pasta onde o banco vai ficar: src/../data/beercontrol.db
-const dataDir = path.join(__dirname, "..", "data");
+// Pasta onde o banco ficará (TEM que estar dentro do container permitido)
+const dataDir = path.join(__dirname, "db"); // <--- ALTERADO AQUI!
+
+// Cria a pasta se não existir
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
@@ -26,7 +28,6 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
   console.log("✔ Banco SQLite aberto em:", dbPath);
 
-  // Cria tabela de dispositivos, se não existir
   const createTableSQL = `
     CREATE TABLE IF NOT EXISTS devices (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
