@@ -1,11 +1,10 @@
 // ===============================
 // Controller de Dispositivos (ESP32 / FlowNode)
 // Responsável por:
-//  - gerar número de série AAAAMMDDBCTXXXX
-//  - vincular MAC + modelo
-//  - responder para o app
+// - gerar número de série AAAAMMDDBCTXXXX
+// - vincular MAC + modelo
+// - responder para o app / firmware
 // ===============================
-
 import { promisify } from "util";
 import db from "../db.js";
 
@@ -20,6 +19,7 @@ function buildSerialPrefix() {
   const year = String(now.getFullYear());
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
+
   const prefix = `${year}${month}${day}BCT`; // AAAAMMDDBCT
   return { prefix, now };
 }
@@ -38,8 +38,8 @@ export const ping = (req, res) => {
 // Corpo esperado: { mac: "AA:BB:CC:DD:EE:FF", model: "BC-FLOWNODE" }
 //
 // Regras:
-//  1. Se já existir dispositivo com esse MAC -> devolve o serial já cadastrado.
-//  2. Se não existir -> gera novo serial AAAAMMDDBCTXXXX, salva e devolve.
+// 1. Se já existir dispositivo com esse MAC -> devolve o serial já cadastrado.
+// 2. Se não existir -> gera novo serial AAAAMMDDBCTXXXX, salva e devolve.
 export const activateDevice = async (req, res) => {
   try {
     const { mac, model } = req.body || {};
@@ -78,7 +78,6 @@ export const activateDevice = async (req, res) => {
     );
 
     let nextNumber = 1;
-
     if (lastForToday && lastForToday.serial) {
       const lastSerial = lastForToday.serial;
       const suffix = lastSerial.slice(-4); // pega XXXX
