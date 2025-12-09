@@ -1,7 +1,6 @@
 // ===============================
 // Controller de Autenticação
 // ===============================
-
 import jwt from "jsonwebtoken";
 
 // Login extremamente simples só para começar
@@ -19,9 +18,11 @@ export const login = (req, res) => {
   }
 
   try {
-    const token = jwt.sign({ user }, process.env.JWT_SECRET, {
-      expiresIn: "8h",
-    });
+    const token = jwt.sign(
+      { user },
+      process.env.JWT_SECRET,
+      { expiresIn: "8h" }
+    );
 
     return res.json({ token });
   } catch (err) {
