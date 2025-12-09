@@ -1,26 +1,26 @@
 // ===============================
 // BeerControl API - servidor principal
 // ===============================
-
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
-import routes from "./routes.js";
-
-dotenv.config();
+import deviceRoutes from "./routes/device.js";
 
 const app = express();
 
-// Middleware base
+// Render sempre usa essa porta internamente
+const PORT = process.env.PORT || 10000;
+
 app.use(cors());
 app.use(express.json());
 
-// Rotas principais
-app.use("/", routes);
+// Prefixo único da API
+app.use("/api", deviceRoutes);
 
-// Porta da aplicação (Render usa PORT do ambiente)
-const PORT = process.env.PORT || 3000;
+// Health check para o ESP
+app.get("/api/ping", (req, res) => {
+  res.json({ ok: true, message: "BeerControl API is alive" });
+});
 
 app.listen(PORT, () => {
-  console.log(`✔ BeerControl API rodando na porta ${PORT}`);
+  console.log(`BeerControl server rodando na porta ${PORT}`);
 });
