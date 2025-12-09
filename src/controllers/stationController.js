@@ -1,7 +1,6 @@
 // ===============================
 // Controller de Estações (Totens / Máquinas)
 // ===============================
-
 import jwt from "jsonwebtoken";
 
 // Gera um token de autorização para a estação se registrar / comunicar
@@ -13,9 +12,11 @@ export const generateToken = (req, res) => {
   }
 
   try {
-    const token = jwt.sign({ stationId }, process.env.JWT_SECRET, {
-      expiresIn: "30d",
-    });
+    const token = jwt.sign(
+      { stationId },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    );
 
     return res.json({ token });
   } catch (err) {
